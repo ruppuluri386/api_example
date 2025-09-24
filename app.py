@@ -2,22 +2,52 @@
 # A simple calculator with add and subtract functions
 from fastapi import FastAPI
 import uvicorn
+from pydantic import BaseModel, Field
 
-app = FastAPI()
 
-@app.get("/add")
-def add(a, b):
+# Create FastAPI instance with metadata for documentation
+app = FastAPI(
+    title="Calculator API",
+    description="A simple calculator API with add and subtract operations",
+    version="0.2.0"
+)
+
+# Define Pydantic models for request validation
+class CalculationInput(BaseModel):
+    a: float = Field(..., description="First number")
+    b: float = Field(..., description="Second number")
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "a": 10.5,
+                    "b": 5.2
+                }
+            ]
+        }
+    }
+
+class CalculationResult(BaseModel):
+    operation: str
+    a: float
+    b: float
+    result: float
+
+
+@app.post("/add", response_model=CalculationResult)
+def add(calculation: CalculationInput):
     """Add two numbers and return the result."""
-    result = float(a) + float(b)
-    # result = a+b
-    return {"operation": "add", "a": a, "b": b, "result": result}
+    result = float(calculation.a) + float(calculation.b)
+    return CalculationResult(operation="add", a=calculation.a, b=calculation.b, result=result)
 
-@app.get("/subtract")
-def subtract(a, b):
+
+@app.post("/subtract", response_model=CalculationResult)
+def subtract(calculation: CalculationInput):
     """Subtract b from a and return the result."""
-    result = float(a) - float(b)
-    # result = a-b
-    return {"operation": "subtract", "a": a, "b": b, "result": result}
+    result = float(calculation.a) - float(calculation.b)
+    return CalculationResult(operation="subtract", a=calculation.a, b=calculation.b, result=result)
+
 
 @app.get("/")
 def read_root():
@@ -28,10 +58,3 @@ def read_root():
 # Main program
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=9321)
-
-
-'''
-import requests
-response = requests.get("http://localhost:9321/add", params={"a": 5, "b": 3})
-print(response.json())
-'''
