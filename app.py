@@ -1,28 +1,37 @@
-
-#mport sys
-#
-#ef add (x,y):
-#   return x+y
-#
-#f __name__ == "__main__":
-#   x=sys.argv[1]
-#   y=sys.argv[2]
-#
-#   result = add(float(x), float(y))
-#   print(f"The sum of {x} and {y} is {result}.")
-  
-
+# calculator.py
+# A simple calculator with add and subtract functions
 from fastapi import FastAPI
 import uvicorn
 
 app = FastAPI()
 
 @app.get("/add")
-def add (x,y):
-   return float(x)+float(y)
-@app.get("/subtract")
-def subtract (x,y):
-   return float(x)-float(y)
+def add(a, b):
+    """Add two numbers and return the result."""
+    result = float(a) + float(b)
+    # result = a+b
+    return {"operation": "add", "a": a, "b": b, "result": result}
 
+@app.get("/subtract")
+def subtract(a, b):
+    """Subtract b from a and return the result."""
+    result = float(a) - float(b)
+    # result = a-b
+    return {"operation": "subtract", "a": a, "b": b, "result": result}
+
+@app.get("/")
+def read_root():
+    """Root endpoint that returns a welcome message."""
+    return {"message": "Calculator API is running. Use /add or /subtract endpoints."}
+
+
+# Main program
 if __name__ == "__main__":
-   uvicorn.run(app, host="0.0.0.0", port=9321)
+    uvicorn.run(app, host="0.0.0.0", port=9321)
+
+
+'''
+import requests
+response = requests.get("http://localhost:9321/add", params={"a": 5, "b": 3})
+print(response.json())
+'''
